@@ -42,15 +42,13 @@ pip install numpy opencv-python streamlit pytesseract pillow pandas
 
 # Attendance-System.py and update the pytesseract.pytesseract.tesseract\_cmd path to point to your Tesseract executable.
 
-
-
 # Usage
 
 # Run the Streamlit app using the following command:
 ```bash
 streamlit run app.py
 ```
-# \###How It Works
+# \How It Works
 
 # 1\. Launch the application.
 # 2\. Present the ID card to the webcam (Ensure the ID number is clearly visible).
@@ -73,33 +71,13 @@ streamlit run app.py
 
 # \-Privacy:\*\* This application processes images locally. No images are stored on the disk; only extracted ID numbers and timestamps are saved.
 
-
-
-# 
-
-# \##License
+# License
 
 # This project is licensed under the \*\*MIT License\*\*.
-
-# Copyright (c) 2026 \[Youssef Mohamed Abdalftah]
-
-
-
+# Copyright (c) 2026 [Youssef Mohamed Abdalftah]
 # Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
-
-
-
 # The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-
-
-
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-
-
-
-# \---
-
-# 
 
 # Feel free to modify and enhance the project as per your requirements!
 
