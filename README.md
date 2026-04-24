@@ -61,18 +61,14 @@ streamlit run app.py
 
 # Notes
 
-# \- Lighting \& Glare:\*\* OCR performance is highly dependent on lighting. Avoid direct reflections (glare) on the ID card, as white spots can erase text details for the camera.
+# - Lighting \& Glare:\*\* OCR performance is highly dependent on lighting. Avoid direct reflections (glare) on the ID card, as white spots can erase text details for the camera.
 
-# \-Tesseract Path:\*\* Ensure the `tesseract\\\_cmd` path in the script matches your actual installation directory (Default: `C:\\\\Program Files\\\\Tesseract-OCR\\\\tesseract.exe`).
-
-# \-Language Support:\*\* The system is configured for `eng+ara`. Ensure you have the Arabic language data file (`ara.traineddata`) installed in your Tesseract `tessdata` folder for Arabic keyword recognition.
-
-# \-CSV Locking:\*\* Close the `attendance\\\_records.csv` file in Excel before running the scan, as Excel may lock the file and prevent Python from writing new data.
-
-# \-Privacy:\*\* This application processes images locally. No images are stored on the disk; only extracted ID numbers and timestamps are saved.
+# - Tesseract Path:\*\* Ensure the `tesseract\\\_cmd` path in the script matches your actual installation directory (Default: `C:\\\\Program Files\\\\Tesseract-OCR\\\\tesseract.exe`).
+# - Language Support:\*\* The system is configured for `eng+ara`. Ensure you have the Arabic language data file (`ara.traineddata`) installed in your Tesseract `tessdata` folder for Arabic keyword recognition.
+# - CSV Locking:\*\* Close the `attendance\\\_records.csv` file in Excel before running the scan, as Excel may lock the file and prevent Python from writing new data.
+# - Privacy:\*\* This application processes images locally. No images are stored on the disk; only extracted ID numbers and timestamps are saved.
 
 # License
-
 # 1. This project is licensed under the \*\*MIT License\*\*.
 # 2. Copyright (c) 2026 [Youssef Mohamed Abdalftah]
 # 3. Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
