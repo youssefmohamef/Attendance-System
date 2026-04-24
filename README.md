@@ -21,9 +21,9 @@
 
 # Before running the application, ensure you have the following installed:
 
-# 1.Python 3.8+
+# 1. Python 3.8+
 
-# 2.Tesseract OCR Engine:
+# 2. Tesseract OCR Engine:
 
 * # Windows: Download and install from UB-Mannheim.
 * # Linux: sudo apt install tesseract-ocr
@@ -33,7 +33,7 @@
 # 1\. Clone the repository or create a new Python script `Attendance-System.py` and paste the provided code.
 
 # 2\. Install the required dependencies using pip:
-```bash
+```
 pip install numpy opencv-python streamlit pytesseract pillow pandas
 ```
 # 3\. Configure Tesseract Path:
@@ -43,19 +43,17 @@ pip install numpy opencv-python streamlit pytesseract pillow pandas
 # Usage
 
 # Run the Streamlit app using the following command:
-```bash
+```
 streamlit run app.py
 ```
 # 📸How It Works
 
-# 1\. Launch the application.
-# 2\. Present the ID card to the webcam (Ensure the ID number is clearly visible).
+# 1. Launch the application.
+# 2. Present the ID card to the webcam (Ensure the ID number is clearly visible).
+# 3. Click "Take Photo".
+# 4. The system will highlight the detected ID and save the entry to the log table below.
 
-# 3\. Click "Take Photo".
-
-# 4\. The system will highlight the detected ID and save the entry to the log table below.
-
-# 5\. Use the "Download Report" button to export the attendance data.
+# 5. Use the "Download Report" button to export the attendance data.
 
 # 📝Notes
 
