@@ -11,8 +11,8 @@ import re
 
 # --- UI Configuration ---
 st.set_page_config(page_title="Smart AI Attendance", layout="wide")
-st.title('🆔 Smart Context-Aware Attendance')
-st.markdown("Recognizes IDs based on keywords like **'ID Number'**, **'Student Code'**, or **'كود الطالب'**.")
+st.title('Smart Context-Aware Attendance')
+# st.markdown("Recognizes IDs based on keywords like **'ID Number'**, **'Student Code'**, or **'كود الطالب'**.")
 st.divider()
 
 # --- OCR Engine Path Configuration ---
