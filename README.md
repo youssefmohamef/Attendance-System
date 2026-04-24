@@ -1,82 +1,41 @@
-# \# Smart ID Attendance System
+# \#Smart ID Attendance System
 
 
 
 # An automated image-based attendance system built with Python, Streamlit, and OpenCV. The system captures student ID cards via webcam, extracts the ID number using OCR (Optical Character Recognition), and logs the attendance with a timestamp into a CSV database.
 
-# 
-
-# \## Features
+# \##Features
 
 * # Live Camera Capture: Uses Streamlit's camera component for real-time scanning.
-
-# 
-
 * # Context-Aware OCR: Smart logic to detect ID numbers whether they are located next to or below keywords like "ID", "Code", or "Student".
-
-# 
-
 * # Image Pre-processing: Advanced OpenCV filters (Grayscale, Gaussian Blur, Adaptive Thresholding) to handle glare and low-light conditions.
-
-# 
-
 * # Attendance Logging: Automatically saves records to attendance\_records.csv.
-
-# 
-
 * # Anti-Duplicate Logic: Prevents the same ID from being logged multiple times within the same minute.
-
-# 
-
 * # Data Export: Built-in button to download the full attendance report.
 
 
 
-# \## Tech Stack
+# \##Tech Stack
 
 * # Frontend: Streamlit
-
-# 
-
 * # Image Processing: OpenCV
-
-# 
-
 * # OCR Engine: Tesseract OCR
-
-# 
-
 * # Data Handling: Pandas
-
-
 
 # \## Prerequisites
 
 # Before running the application, ensure you have the following installed:
 
-# 
-
 1. # Python 3.8+
-
-# 
 
 # 2.Tesseract OCR Engine:
 
-# 
-
 * # Windows: Download and install from UB-Mannheim.
-
-# 
-
 * # Linux: sudo apt install tesseract-ocr
 
-# \## Installation
-
-# 
+# \##Installation
 
 # 1\. Clone the repository or create a new Python script `Attendance-System.py` and paste the provided code.
-
-# 
 
 # 2\. Install the required dependencies using pip:
 
@@ -92,9 +51,7 @@
 
 
 
-# \## Usage
-
-
+# \##Usage
 
 # Run the Streamlit app using the following command:
 
@@ -104,39 +61,35 @@
 
 # ```
 
-# 
-
-# \### How It Works
+# \###How It Works
 
 1. # Launch the application.
 
-# .2 Present the ID card to the webcam (Ensure the ID number is clearly visible).
+# 2\. Present the ID card to the webcam (Ensure the ID number is clearly visible).
 
-# .3 Click "Take Photo".
+# 3\. Click "Take Photo".
 
-# .4  The system will highlight the detected ID and save the entry to the log table below.
+# 4\.  The system will highlight the detected ID and save the entry to the log table below.
 
 # 5\.   Use the "Download Report" button to export the attendance data.
 
-# 
-
-# \## Notes
+# \##Notes
 
 # \- Lighting \& Glare:\*\* OCR performance is highly dependent on lighting. Avoid direct reflections (glare) on the ID card, as white spots can erase text details for the camera.
 
-# \- Tesseract Path:\*\* Ensure the `tesseract\_cmd` path in the script matches your actual installation directory (Default: `C:\\Program Files\\Tesseract-OCR\\tesseract.exe`).
+# \-Tesseract Path:\*\* Ensure the `tesseract\\\_cmd` path in the script matches your actual installation directory (Default: `C:\\\\Program Files\\\\Tesseract-OCR\\\\tesseract.exe`).
 
-# \- Language Support:\*\* The system is configured for `eng+ara`. Ensure you have the Arabic language data file (`ara.traineddata`) installed in your Tesseract `tessdata` folder for Arabic keyword recognition.
+# \-Language Support:\*\* The system is configured for `eng+ara`. Ensure you have the Arabic language data file (`ara.traineddata`) installed in your Tesseract `tessdata` folder for Arabic keyword recognition.
 
-# \- CSV Locking:\*\* Close the `attendance\_records.csv` file in Excel before running the scan, as Excel may lock the file and prevent Python from writing new data.
+# \-CSV Locking:\*\* Close the `attendance\\\_records.csv` file in Excel before running the scan, as Excel may lock the file and prevent Python from writing new data.
 
-# \- Privacy:\*\* This application processes images locally. No images are stored on the disk; only extracted ID numbers and timestamps are saved.
+# \-Privacy:\*\* This application processes images locally. No images are stored on the disk; only extracted ID numbers and timestamps are saved.
 
 
 
 # 
 
-# \## License
+# \##License
 
 # This project is licensed under the \*\*MIT License\*\*.
 
@@ -163,6 +116,4 @@
 # Feel free to modify and enhance the project as per your requirements!
 
 # 
-
-
 
