@@ -16,7 +16,10 @@ st.divider()
 
 
 # load pytesseract model
-pytesseract.pytesseract.tesseract_cmd = "/usr/bin/tesseract"
+if os.name == "nt":  # Windows
+    pytesseract.pytesseract.tesseract_cmd = r"C:\Program Files\Tesseract-OCR\tesseract.exe"
+else:  # Linux (Streamlit Cloud)
+    pytesseract.pytesseract.tesseract_cmd = "/usr/bin/tesseract"
 # Define a function to extract test from image
 def pre_process_image(img_array):
     """Enhance image for better OCR results."""
