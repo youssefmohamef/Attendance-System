@@ -1,6 +1,6 @@
 # Smart ID Attendance System
 
-# An automated image-based attendance system built with Python, Streamlit, and OpenCV. The system captures student ID cards via webcam, extracts the ID number using OCR (Optical Character Recognition), and logs the attendance with a timestamp into a CSV database.
+## An automated image-based attendance system built with Python, Streamlit, and OpenCV. The system captures student ID cards via webcam, extracts the ID number using OCR (Optical Character Recognition), and logs the attendance with a timestamp into a CSV database.
 
 # 🚀Features
 * Live Camera Capture: Uses Streamlit's camera component for real-time scanning.
