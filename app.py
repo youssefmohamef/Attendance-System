@@ -17,8 +17,11 @@ st.divider()
 
 # --- OCR Engine Path Configuration ---
 # Update this path based on your Tesseract installation directory
-pytesseract.pytesseract.tesseract_cmd = r"C:\Program Files\Tesseract-OCR\tesseract.exe"
-
+if os.name == "nt":
+    pytesseract.pytesseract.tesseract_cmd = r"C:\Program Files\Tesseract-OCR\tesseract.exe"
+else:
+    pytesseract.pytesseract.tesseract_cmd = "/usr/bin/tesseract"
+    
 # --- Helper Functions ---
 
 def pre_process_image(img_array):
