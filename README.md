@@ -36,11 +36,7 @@
 
 # 2\. Install the required dependencies using pip:
 
-# &#x20;  ```sh
-
-# &#x20;  pip install numpy opencv-python streamlit pytesseract pillow pandas
-
-# &#x20;  ```
+# &#x20;  ```sh &#x20;  pip install numpy opencv-python streamlit pytesseract pillow pandas&#x20;  ```
 
 # 3\. Configure Tesseract Path:
 
