@@ -23,7 +23,7 @@
 
 # Before running the application, ensure you have the following installed:
 
-1. # Python 3.8+
+# 1.Python 3.8+
 
 # 2.Tesseract OCR Engine:
 
