@@ -64,14 +64,13 @@ bush``` `C:\\\\Program Files\\\\Tesseract-OCR\\\\tesseract.exe`). ```
  - CSV Locking:\*\* Close the `attendance\\\_records.csv` file in Excel before running the scan, as Excel may lock the file and prevent Python from writing new data.
  - Privacy: This application processes images locally. No images are stored on the disk; only extracted ID numbers and timestamps are saved.
 
-⚖️License
+# ⚖️License
  1. This project is licensed under the \*\*MIT License\*\*.
  2. Copyright (c) 2026 [Youssef Mohamed Abdalftah]
  3. Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
  4. The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
  5. This project is provided “as is”, without any express or implied warranties, including but not limited to merchantability or fitness for a particular purpose. The authors shall not be held liable for any damages, claims, or other liabilities arising from the use of this software.
 
- Feel free to modify and enhance the project as per your requirements!
+## Feel free to modify and enhance the project as per your requirements!
 
-# 
 
