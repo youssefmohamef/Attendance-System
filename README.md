@@ -48,12 +48,11 @@ pip install numpy opencv-python streamlit pytesseract pillow pandas
 
 # Run the Streamlit app using the following command:
 ```bash
-# streamlit run app.py
+streamlit run app.py
 ```
 # \###How It Works
 
-1. # Launch the application.
-
+# 1\. Launch the application.
 # 2\. Present the ID card to the webcam (Ensure the ID number is clearly visible).
 
 # 3\. Click "Take Photo".
