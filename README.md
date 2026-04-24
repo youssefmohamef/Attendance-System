@@ -35,8 +35,7 @@
 # 1\. Clone the repository or create a new Python script `Attendance-System.py` and paste the provided code.
 
 # 2\. Install the required dependencies using pip:
-
-# &#x20;  ```sh &#x20;  pip install numpy opencv-python streamlit pytesseract pillow pandas&#x20;  ```
+```pip install numpy opencv-python streamlit pytesseract pillow pandas;  ```
 
 # 3\. Configure Tesseract Path:
 
