@@ -1,28 +1,25 @@
-# \#Smart ID Attendance System
+##Smart ID Attendance System
 
 
 
 # An automated image-based attendance system built with Python, Streamlit, and OpenCV. The system captures student ID cards via webcam, extracts the ID number using OCR (Optical Character Recognition), and logs the attendance with a timestamp into a CSV database.
 
-# \##Features
-
+# ##Features
 * # Live Camera Capture: Uses Streamlit's camera component for real-time scanning.
 * # Context-Aware OCR: Smart logic to detect ID numbers whether they are located next to or below keywords like "ID", "Code", or "Student".
 * # Image Pre-processing: Advanced OpenCV filters (Grayscale, Gaussian Blur, Adaptive Thresholding) to handle glare and low-light conditions.
 * # Attendance Logging: Automatically saves records to attendance\_records.csv.
 * # Anti-Duplicate Logic: Prevents the same ID from being logged multiple times within the same minute.
 * # Data Export: Built-in button to download the full attendance report.
-
-
-
-# \##Tech Stack
+  
+###Tech Stack
 
 * # Frontend: Streamlit
 * # Image Processing: OpenCV
 * # OCR Engine: Tesseract OCR
 * # Data Handling: Pandas
 
-# \## Prerequisites
+### Prerequisites
 
 # Before running the application, ensure you have the following installed:
 
@@ -33,7 +30,7 @@
 * # Windows: Download and install from UB-Mannheim.
 * # Linux: sudo apt install tesseract-ocr
 
-# \##Installation
+###Installation
 
 # 1\. Clone the repository or create a new Python script `Attendance-System.py` and paste the provided code.
 
