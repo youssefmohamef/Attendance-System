@@ -52,7 +52,6 @@ streamlit run app.py
 # 2. Present the ID card to the webcam (Ensure the ID number is clearly visible).
 # 3. Click "Take Photo".
 # 4. The system will highlight the detected ID and save the entry to the log table below.
-
 # 5. Use the "Download Report" button to export the attendance data.
 
 # 📝Notes
@@ -63,7 +62,7 @@ streamlit run app.py
 bush``` `C:\\\\Program Files\\\\Tesseract-OCR\\\\tesseract.exe`). ```
 # - Language Support:\*\* The system is configured for (`eng+ara`). Ensure you have the Arabic language data file (`ara.traineddata`) installed in your Tesseract `tessdata` folder for Arabic keyword recognition.
 # - CSV Locking:\*\* Close the `attendance\\\_records.csv` file in Excel before running the scan, as Excel may lock the file and prevent Python from writing new data.
-# - Privacy:\*\* This application processes images locally. No images are stored on the disk; only extracted ID numbers and timestamps are saved.
+# - Privacy: This application processes images locally. No images are stored on the disk; only extracted ID numbers and timestamps are saved.
 
 # ⚖️License
 # 1. This project is licensed under the \*\*MIT License\*\*.
