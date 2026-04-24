@@ -38,8 +38,7 @@ def extract_id_with_context(text):
     """
     # List of keywords in English and Arabic
     keywords = ['id', 'number', 'code', 'student', 'كود', 'الرقم', 'طالب', 'جامعي']
-    lines = text.lower().splitlines()
-    
+    lines = [line.strip() for line in text.lower().splitlines() if line.strip()]    
     for line in lines:
         # If the line contains any of our keywords
         if any(key in line for key in keywords):
