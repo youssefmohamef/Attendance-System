@@ -10,46 +10,61 @@ import os
 import re
 
 # --- UI Configuration ---
-st.set_page_config(page_title="AI Attendance System", layout="wide")
-st.title('🆔 Smart Attendance System')
-st.markdown("Scan student IDs to log attendance in real-time.")
+st.set_page_config(page_title="Smart AI Attendance", layout="wide")
+st.title('🆔 Smart Context-Aware Attendance')
+st.markdown("Recognizes IDs based on keywords like **'ID Number'**, **'Student Code'**, or **'كود الطالب'**.")
 st.divider()
 
 # --- OCR Engine Path Configuration ---
-# Update this path based on your Tesseract installation directory
 if os.name == "nt":
     pytesseract.pytesseract.tesseract_cmd = r"C:\Program Files\Tesseract-OCR\tesseract.exe"
 else:
     pytesseract.pytesseract.tesseract_cmd = "/usr/bin/tesseract"
-    
+
 # --- Helper Functions ---
 
 def pre_process_image(img_array):
-    """
-    Apply image processing to improve OCR accuracy.
-    Converts to grayscale, blurs to reduce noise, and applies Otsu's thresholding.
-    """
+    """Enhance image for better OCR accuracy."""
     gray = cv2.cvtColor(img_array, cv2.COLOR_BGR2GRAY)
-    blurred = cv2.GaussianBlur(gray, (5, 5), 0)
+    # Median blur to remove noise while keeping edges sharp
+    blurred = cv2.medianBlur(gray, 3)
+    # Apply Otsu's thresholding
     _, processed_img = cv2.threshold(blurred, 0, 255, cv2.THRESH_BINARY | cv2.THRESH_OTSU)
     return processed_img
 
+def extract_id_with_context(text):
+    """
+    Looks for numeric IDs specifically after certain keywords.
+    """
+    # List of keywords in English and Arabic
+    keywords = ['id', 'number', 'code', 'student', 'كود', 'الرقم', 'طالب', 'جامعي']
+    lines = text.lower().splitlines()
+    
+    for line in lines:
+        # If the line contains any of our keywords
+        if any(key in line for key in keywords):
+            # Find all numbers in that specific line
+            numbers = re.findall(r'\d+', line)
+            if numbers:
+                # Return the first number found in the context line
+                return numbers[0]
+    
+    # Fallback: If no keyword context found, search for any long number (e.g., 4+ digits)
+    fallback = re.findall(r'\d{4,}', text)
+    return fallback[0] if fallback else None
+
 def save_attendance(student_id):
-    """
-    Handles data logging to a CSV file.
-    Includes logic to prevent duplicate entries within the same minute.
-    """
+    """Log to CSV and prevent duplicates in the same minute."""
     filename = 'attendance_records.csv'
     now = datetime.datetime.now()
     timestamp = now.strftime("%Y-%m-%d %H:%M:%S")
-    current_minute = now.strftime("%Y-%m-%d %H:%M") # Used for duplicate checking
+    current_minute = now.strftime("%Y-%m-%d %H:%M")
     
     new_entry = pd.DataFrame([[student_id, timestamp]], columns=['Student_ID', 'Timestamp'])
     
-    # Check if file exists to either append or create new
     if os.path.isfile(filename):
         df_existing = pd.read_csv(filename)
-        # Verify if this ID was already logged in the current minute
+        # Check if ID already exists in the current minute
         is_duplicate = not df_existing[(df_existing['Student_ID'].astype(str) == str(student_id)) & 
                                      (df_existing['Timestamp'].str.contains(current_minute))].empty
         
@@ -57,74 +72,71 @@ def save_attendance(student_id):
             new_entry.to_csv(filename, mode='a', header=False, index=False)
             return timestamp, True
         else:
-            return timestamp, False # Entry ignored due to duplication
+            return timestamp, False
     else:
         new_entry.to_csv(filename, index=False)
         return timestamp, True
 
 # --- Main Application Logic ---
 
-# Step 1: Camera Input Component
-st.subheader("📸 Step 1: Scan ID")
-picture = st.camera_input("Point the camera at the ID card")
+# Step 1: Camera Input
+st.subheader("📸 Step 1: Scan ID Card")
+picture = st.camera_input("Position the card clearly in the frame")
 
 if picture:
-    # Convert Streamlit's UploadedFile to OpenCV format
     pil_img = Image.open(picture)
     img_array = np.array(pil_img)
     img_bgr = cv2.cvtColor(img_array, cv2.COLOR_RGB2BGR)
 
-    with st.spinner('Analyzing ID...'):
-        # Step 2: Image Pre-processing and Text Extraction
+    with st.spinner('🔍 Analyzing context and searching for ID...'):
         processed_img = pre_process_image(img_bgr)
-        # Using PSM 6 (Assume a single uniform block of text) for better digit detection
-        extracted_text = pytesseract.image_to_string(processed_img, config='--psm 6')
+        # Try to read both English and Arabic if data files are present
+        try:
+            extracted_text = pytesseract.image_to_string(processed_img, lang='eng+ara', config='--psm 6')
+        except:
+            extracted_text = pytesseract.image_to_string(processed_img, lang='eng', config='--psm 6')
         
-        # Step 3: Regex Pattern to find any numeric sequence
-        id_pattern = re.findall(r'\d+', extracted_text)
+        # Step 2: Use Context Logic to find the right number
+        student_id = extract_id_with_context(extracted_text)
 
-    # UI Output Columns
     st.divider()
     col1, col2 = st.columns(2)
 
     with col1:
-        st.image(img_bgr, channels="BGR", caption="Captured Image")
+        st.image(img_bgr, channels="BGR", caption="Original Captured Image")
 
     with col2:
-        st.subheader("🔍 Extraction Result")
-        if id_pattern:
-            # Taking the first detected number as the Primary ID
-            student_id = id_pattern[0]
-            st.info(f"**Detected ID:** {student_id}")
+        st.subheader("🎯 System Detection")
+        if student_id:
+            st.success(f"**Identified ID:** {student_id}")
             
-            # Step 4: Attempt to save the record
+            # Step 3: Save Record
             log_time, success = save_attendance(student_id)
             
             if success:
-                st.success(f"✅ Logged successfully at {log_time}")
+                st.info(f"✅ Registered at: {log_time}")
                 st.balloons()
             else:
                 st.warning("⚠️ Already logged in the last minute.")
             
-            # Action Button to reset camera for next user
-            if st.button("➕ Scan Another Person"):
+            if st.button("➕ Add Another Person"):
                 st.rerun()
         else:
-            st.error("❌ No ID detected. Please try again with better lighting.")
+            st.error("❌ Could not find an ID (e.g., Code, ID, Number).")
+            with st.expander("Show Raw OCR Result"):
+                st.text(extracted_text)
 
-# --- Step 5: Data Visualization & Export ---
+# --- Step 4: History & Export ---
 if os.path.isfile('attendance_records.csv'):
     st.divider()
-    st.subheader("📋 Attendance Log (History)")
+    st.subheader("📋 Today's Attendance Log")
     df_log = pd.read_csv('attendance_records.csv')
     
-    # Display the dataframe in reverse order (newest logs first)
     st.dataframe(df_log.iloc[::-1], use_container_width=True)
     
-    # Download button for the final CSV report
     csv_data = df_log.to_csv(index=False).encode('utf-8')
     st.download_button(
-        label="📥 Download Full Attendance Sheet",
+        label="📥 Download Attendance Report",
         data=csv_data,
         file_name='attendance_report.csv',
         mime='text/csv',
