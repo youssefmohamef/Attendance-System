@@ -25,8 +25,8 @@ Before running the application, ensure you have the following installed:
 
 2. Tesseract OCR Engine:
 
-*  Windows: Download and install from UB-Mannheim.
-*  Linux: sudo apt install tesseract-ocr
+  *  Windows: Download and install from UB-Mannheim.
+  *  Linux: sudo apt install tesseract-ocr
 
 # ⚙️Installation
 
