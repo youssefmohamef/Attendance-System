@@ -69,4 +69,60 @@ if picture:
     # Convert Streamlit's UploadedFile to OpenCV format
     pil_img = Image.open(picture)
     img_array = np.array(pil_img)
-    img_b
+    img_bgr = cv2.cvtColor(img_array, cv2.COLOR_RGB2BGR)
+
+    with st.spinner('Analyzing ID...'):
+        # Step 2: Image Pre-processing and Text Extraction
+        processed_img = pre_process_image(img_bgr)
+        # Using PSM 6 (Assume a single uniform block of text) for better digit detection
+        extracted_text = pytesseract.image_to_string(processed_img, config='--psm 6')
+        
+        # Step 3: Regex Pattern to find any numeric sequence
+        id_pattern = re.findall(r'\d+', extracted_text)
+
+    # UI Output Columns
+    st.divider()
+    col1, col2 = st.columns(2)
+
+    with col1:
+        st.image(img_bgr, channels="BGR", caption="Captured Image")
+
+    with col2:
+        st.subheader("🔍 Extraction Result")
+        if id_pattern:
+            # Taking the first detected number as the Primary ID
+            student_id = id_pattern[0]
+            st.info(f"**Detected ID:** {student_id}")
+            
+            # Step 4: Attempt to save the record
+            log_time, success = save_attendance(student_id)
+            
+            if success:
+                st.success(f"✅ Logged successfully at {log_time}")
+                st.balloons()
+            else:
+                st.warning("⚠️ Already logged in the last minute.")
+            
+            # Action Button to reset camera for next user
+            if st.button("➕ Scan Another Person"):
+                st.rerun()
+        else:
+            st.error("❌ No ID detected. Please try again with better lighting.")
+
+# --- Step 5: Data Visualization & Export ---
+if os.path.isfile('attendance_records.csv'):
+    st.divider()
+    st.subheader("📋 Attendance Log (History)")
+    df_log = pd.read_csv('attendance_records.csv')
+    
+    # Display the dataframe in reverse order (newest logs first)
+    st.dataframe(df_log.iloc[::-1], use_container_width=True)
+    
+    # Download button for the final CSV report
+    csv_data = df_log.to_csv(index=False).encode('utf-8')
+    st.download_button(
+        label="📥 Download Full Attendance Sheet",
+        data=csv_data,
+        file_name='attendance_report.csv',
+        mime='text/csv',
+    )
