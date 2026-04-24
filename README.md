@@ -46,12 +46,7 @@
 # Usage
 
 # Run the Streamlit app using the following command:
-
-# ```sh
-
 # streamlit run app.py
-
-# ```
 
 # \###How It Works
 
