@@ -36,7 +36,7 @@
 
 # 2\. Install the required dependencies using pip:
 ```bash
-pip install numpy opencv-python streamlit pytesseract pillow pandas;
+pip install numpy opencv-python streamlit pytesseract pillow pandas
 ```
 # 3\. Configure Tesseract Path:
 
@@ -47,8 +47,9 @@ pip install numpy opencv-python streamlit pytesseract pillow pandas;
 # Usage
 
 # Run the Streamlit app using the following command:
+```bash
 # streamlit run app.py
-
+```
 # \###How It Works
 
 1. # Launch the application.
