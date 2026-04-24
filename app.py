@@ -34,23 +34,35 @@ def pre_process_image(img_array):
 
 def extract_id_with_context(text):
     """
-    Looks for numeric IDs specifically after certain keywords.
+    Search logic:
+    1. Look for keywords (ID, Code, etc.)
+    2. Check the same line for numbers.
+    3. If not found, check the immediate next line.
     """
-    # List of keywords in English and Arabic
     keywords = ['id', 'number', 'code', 'student', 'كود', 'الرقم', 'طالب', 'جامعي']
-    lines = [line.strip() for line in text.lower().splitlines() if line.strip()]    
-    for line in lines:
-        # If the line contains any of our keywords
-        if any(key in line for key in keywords):
-            # Find all numbers in that specific line
-            numbers = re.findall(r'\d+', line)
-            if numbers:
-                # Return the first number found in the context line
-                return numbers[0]
+    lines = [line.strip() for line in text.lower().splitlines() if line.strip()]
     
-    # Fallback: If no keyword context found, search for any long number (e.g., 4+ digits)
-    fallback = re.findall(r'\d{4,}', text)
-    return fallback[0] if fallback else None
+    for i, line in enumerate(lines):
+        # If a keyword is found in the current line
+        if any(key in line for key in keywords):
+            # A. Search for numbers in the SAME line (بجانب الكلمة)
+            numbers_same_line = re.findall(r'\d+', line)
+            if numbers_same_line:
+                # Return the first number that looks like an ID (at least 3 digits)
+                for num in numbers_same_line:
+                    if len(num) >= 3: return num
+            
+            # B. Search in the NEXT line (أسفل الكلمة) - fixed for your ID card style
+            if i + 1 < len(lines):
+                next_line = lines[i+1]
+                numbers_next_line = re.findall(r'\d+', next_line)
+                if numbers_next_line:
+                    for num in numbers_next_line:
+                        if len(num) >= 3: return num
+    
+    # Fallback: Just find the longest numeric string in the whole text
+    all_numbers = re.findall(r'\d{5,}', text)
+    return all_numbers[0] if all_numbers else None
 
 def save_attendance(student_id):
     """Log to CSV and prevent duplicates in the same minute."""
