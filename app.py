@@ -40,7 +40,7 @@ def pre_process_image(img_array):
 
 def extract_id_with_context(text):
     """منطق البحث عن الرقم (بجانب الكلمة أو في السطر الذي يليها)"""
-    keywords = ['id', 'number', 'code', 'student', 'كود', 'الرقم', 'الطالب', 'جامعي']
+    keywords = ['id',":كود الطالب"]
     lines = [line.strip() for line in text.lower().splitlines() if line.strip()]
     
     for i, line in enumerate(lines):
