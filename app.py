@@ -172,12 +172,43 @@ with st.sidebar:
             st.info("Log is already clean.")
 
 # --- عرض سجل الحضور وتصديره ---
+# --- Step 4: Attendance Log with Delete Option ---
 if os.path.isfile('attendance_records.csv'):
     st.divider()
-    st.subheader("📋 Attendance Records")
-    df_log = pd.read_csv('attendance_records.csv')
-    st.dataframe(df_log.iloc[::-1], use_container_width=True)
+    st.subheader("📋 Attendance Records (Select to Delete)")
     
-    # تحويل البيانات لملف CSV قابل للتحميل
+    # 1. قراءة البيانات
+    df_log = pd.read_csv('attendance_records.csv')
+    
+    # 2. إضافة عمود "Delete" كـ Checkbox باستخدام st.data_editor
+    # هذا يسمح للمستخدم بتحديد الصفوف التي يريد مسحها
+    edited_df = st.data_editor(
+        df_log.iloc[::-1], # عرض السجل من الأحدث للأقدم
+        column_config={
+            "Delete": st.column_config.CheckboxColumn(
+                "Select to Delete",
+                help="Check the box to mark for deletion",
+                default=False,
+            )
+        },
+        disabled=["Student_ID", "Timestamp"], # منع تعديل البيانات نفسها
+        use_container_width=True,
+        key="attendance_editor"
+    )
+
+    # 3. زر لتنفيذ عملية الحذف للصفوف المختارة
+    if st.button("🗑️ Delete Selected Rows"):
+        # نحدد الصفوف التي لم يتم تعليمها للحذف
+        # ملاحظة: edited_df قد يحتوي على عمود Delete الجديد
+        if "Delete" in edited_df.columns:
+            remaining_df = edited_df[edited_df["Delete"] == False].drop(columns=["Delete"])
+            # عكس الترتيب مرة أخرى قبل الحفظ ليبقى الترتيب الزمني صحيحاً
+            remaining_df.iloc[::-1].to_csv('attendance_records.csv', index=False)
+            st.success("Selected records deleted!")
+            st.rerun()
+        else:
+            st.info("Please select rows to delete first.")
+
+    # 4. زر التحميل
     csv_data = df_log.to_csv(index=False).encode('utf-8')
-    st.download_button("📥 Download Report (Excel/CSV)", csv_data, "attendance.csv", "text/csv")
+    st.download_button("📥 Download Report (CSV)", csv_data, "attendance.csv", "text/csv")
