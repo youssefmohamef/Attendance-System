@@ -9,56 +9,55 @@ import pandas as pd
 import os
 import re
 
-# --- إعدادات الواجهة ---
+# --- UI Configuration ---
 st.set_page_config(page_title="AI Attendance System", layout="wide")
 st.title('🆔 Smart Attendance System')
 st.markdown("Scan your ID card using the **Camera** or **Upload a Photo**.")
 
-# 1. تهيئة Session State لمسح الصور عند الانتقال للطالب التالي
+# --- Session State Initialization ---
+# This key is used to reset the camera/uploader when switching to a new student
 if 'uploader_key' not in st.session_state:
     st.session_state.uploader_key = 0
 
-# --- إعداد مسار محرك Tesseract ---
+# --- Tesseract OCR Path ---
 if os.name == "nt":
     pytesseract.pytesseract.tesseract_cmd = r"C:\Program Files\Tesseract-OCR\tesseract.exe"
 else:
     pytesseract.pytesseract.tesseract_cmd = "/usr/bin/tesseract"
 
-# --- الدوال البرمجية ---
+# --- Image Processing Functions ---
 
 def pre_process_image(img_array):
-    """تحسين الصورة لنتائج OCR أفضل."""
+    """Convert to grayscale and apply Otsu thresholding for better OCR"""
     gray = cv2.cvtColor(img_array, cv2.COLOR_BGR2GRAY)
-    # استخدام عتبة Otsu لتوضيح النص
     _, processed_img = cv2.threshold(gray, 0, 255, cv2.THRESH_BINARY | cv2.THRESH_OTSU)
     return processed_img
 
 def extract_id_with_context(text):
-    """منطق مخصص لقراءة 'كود الطالب' وتجاهل أرقام CMP"""
+    """Search for student code based on specific keywords"""
     lines = [line.strip() for line in text.lower().splitlines() if line.strip()]
     target_keywords = ['كود الطالب', 'student code', 'كود', 'code', "id number"]
     
     for i, line in enumerate(lines):
         if any(key in line for key in target_keywords):
-            # بحث في نفس السطر
+            # Check for numbers in the same line (excluding letters like CMP)
             numbers_same_line = re.findall(r'\b\d{5,}\b', line) 
             if numbers_same_line:
                 return numbers_same_line[0]
             
-            # بحث في السطر التالي
+            # Check for numbers in the next line
             if i + 1 < len(lines):
                 next_line = lines[i+1]
                 numbers_next_line = re.findall(r'\b\d{5,}\b', next_line)
                 if numbers_next_line:
                     return numbers_next_line[0]
     
+    # Fallback: Find the last long numeric string in the text
     all_long_numbers = re.findall(r'\b\d{7,}\b', text)
-    if all_long_numbers:
-        return all_long_numbers[-1]
-        
-    return None
+    return all_long_numbers[-1] if all_long_numbers else None
 
 def save_attendance(student_id):
+    """Log the student ID to a CSV file and prevent duplicates in the same minute"""
     filename = 'attendance_records.csv'
     now = datetime.datetime.now()
     timestamp = now.strftime("%Y-%m-%d %H:%M:%S")
@@ -73,33 +72,31 @@ def save_attendance(student_id):
         if not is_duplicate:
             new_entry.to_csv(filename, mode='a', header=False, index=False)
             return timestamp, True
-        else:
-            return timestamp, False
+        return timestamp, False
     else:
         new_entry.to_csv(filename, index=False)
         return timestamp, True
 
-# --- منطق الاختيار بين الكاميرا والرفع ---
+# --- Main App Logic ---
 
 st.subheader("📸 Step 1: Input Source")
-input_mode = st.radio("Choose how to provide the ID image:", 
-                       ("📷 Live Camera Scan", "📁 Upload Image from Device"), 
-                       horizontal=True)
+input_mode = st.radio("Choose source:", ("📷 Live Camera Scan", "📁 Upload Image"), horizontal=True)
 
+# Generate a dynamic key to reset inputs
 final_image_file = None
+current_key = f"{input_mode}_{st.session_state.uploader_key}"
 
-# استخدام المفتاح الديناميكي (st.session_state.uploader_key) لمسح الصورة
 if input_mode == "📷 Live Camera Scan":
-    final_image_file = st.camera_input("Take a photo of your ID", key=f"cam_{st.session_state.uploader_key}")
+    final_image_file = st.camera_input("Capture ID", key=current_key)
 else:
-    final_image_file = st.file_uploader("Select ID image...", type=['jpg', 'jpeg', 'png'], key=f"file_{st.session_state.uploader_key}")
+    final_image_file = st.file_uploader("Upload Image", type=['jpg', 'jpeg', 'png'], key=current_key)
 
 if final_image_file:
     pil_img = Image.open(final_image_file)
     img_array = np.array(pil_img)
     img_bgr = cv2.cvtColor(img_array, cv2.COLOR_RGB2BGR)
 
-    with st.spinner('🔍 Analyzing Image...'):
+    with st.spinner('🔍 Extracting ID...'):
         processed_img = pre_process_image(img_bgr)
         try:
             extracted_text = pytesseract.image_to_string(processed_img, lang='eng+ara', config='--psm 6')
@@ -112,67 +109,55 @@ if final_image_file:
     col1, col2 = st.columns(2)
 
     with col1:
-        st.image(img_bgr, channels="BGR", caption="Original Captured Image")
+        st.image(img_bgr, channels="BGR", caption="Input Image")
 
     with col2:
-        st.subheader("🎯 Detection Result")
+        st.subheader("🎯 Result")
         if student_id:
             st.success(f"**Identified ID:** {student_id}")
             log_time, success = save_attendance(student_id)
             
             if success:
-                st.info(f"✅ Registered at: {log_time}")
+                st.info(f"✅ Logged at: {log_time}")
                 st.balloons()
             else:
-                st.warning("⚠️ Already logged in the last minute.")
+                st.warning("⚠️ Already logged recently.")
             
-            # عند الضغط على الزر، نقوم بزيادة المفتاح لمسح الواجهة
+            # Increment key to clear the current photo for the next student
             if st.button("➕ Next Student"):
                 st.session_state.uploader_key += 1
                 st.rerun()
         else:
-            st.error("❌ No ID found. Please try a clearer photo.")
-            if st.button("🔄 Try Again"):
+            st.error("❌ No ID detected.")
+            if st.button("🔄 Retry"):
                 st.session_state.uploader_key += 1
                 st.rerun()
 
-# --- الشريط الجانبي لإدارة السجلات ---
+# --- Record Management (Sidebar) ---
 with st.sidebar:
-    st.header("🧹 Manage Records")
-    if st.button("⏪ Delete Last Entry"):
-        if os.path.isfile('attendance_records.csv'):
-            df = pd.read_csv('attendance_records.csv')
-            if not df.empty:
-                df = df[:-1].to_csv('attendance_records.csv', index=False)
-                st.success("Last record deleted!")
-                st.rerun()
-    
-    if st.button("🗑️ Clear All Records", type="primary"):
+    st.header("🧹 Data Management")
+    if st.button("🗑️ Clear Everything", type="primary"):
         if os.path.isfile('attendance_records.csv'):
             os.remove('attendance_records.csv')
-            st.success("All records cleared!")
             st.rerun()
 
-# --- عرض سجل الحضور ---
+# --- Attendance History Table ---
 if os.path.isfile('attendance_records.csv'):
     st.divider()
-    st.subheader("📋 Attendance Records (Select to Delete)")
+    st.subheader("📋 Attendance History")
     df_log = pd.read_csv('attendance_records.csv')
     
+    # Interactive data editor to allow individual row deletion
     edited_df = st.data_editor(
         df_log.iloc[::-1], 
-        column_config={"Delete": st.column_config.CheckboxColumn("Select to Delete", default=False)},
+        column_config={"Delete": st.column_config.CheckboxColumn("Remove", default=False)},
         disabled=["Student_ID", "Timestamp"],
         use_container_width=True,
-        key="attendance_editor"
+        key="editor"
     )
 
-    if st.button("🗑️ Delete Selected Rows"):
+    if st.button("❌ Remove Selected"):
         if "Delete" in edited_df.columns:
-            remaining_df = edited_df[edited_df["Delete"] == False].drop(columns=["Delete"])
-            remaining_df.iloc[::-1].to_csv('attendance_records.csv', index=False)
-            st.success("Selected records deleted!")
+            final_df = edited_df[edited_df["Delete"] == False].drop(columns=["Delete"])
+            final_df.iloc[::-1].to_csv('attendance_records.csv', index=False)
             st.rerun()
-    
-    csv_data = df_log.to_csv(index=False).encode('utf-8')
-    st.download_button("📥 Download Report (CSV)", csv_data, "attendance.csv", "text/csv")
