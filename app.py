@@ -23,43 +23,55 @@ else:
 # --- الدوال البرمجية ---
 
 def pre_process_image(img_array):
+    """
+    تحسين احترافي للصورة للتعامل مع الإضاءة القوية (Glare) 
+    وتوضيح الأرقام الباهتة.
+    """
     # 1. تحويل للرمادي
     gray = cv2.cvtColor(img_array, cv2.COLOR_BGR2GRAY)
     
-    # 2. زيادة التباين (Contrast) لإظهار الأرقام الباهتة
+    # 2. تقنية CLAHE لزيادة التباين وتوضيح الأرقام المختفية بسبب الإضاءة
     clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8,8))
-    gray = clahe.apply(gray)
+    enhanced = clahe.apply(gray)
     
-    # 3. إزالة النويز مع الحفاظ على حواف الأرقام حادة
-    denoised = cv2.fastNlMeansDenoising(gray, h=10)
+    # 3. إزالة الضوضاء (Noise) مع الحفاظ على حدة الأرقام
+    denoised = cv2.fastNlMeansDenoising(enhanced, h=10)
     
-    # 4. تحويل لأسود وأبيض نقي (Thresholding)
+    # 4. تحويل لأسود وأبيض نقي باستخدام Otsu's Thresholding
     _, processed_img = cv2.threshold(denoised, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
     
     return processed_img
 
 def extract_id_with_context(text):
-    """منطق البحث عن الرقم (بجانب الكلمة أو في السطر الذي يليها)"""
-    keywords = ['id',":كود الطالب"]
+    """
+    منطق بحث دقيق جداً:
+    يبحث عن الكلمة المفتاحية أولاً، ثم يسحب الرقم "الوحيد" المرتبط بها 
+    بدلاً من سحب أي رقم طويل عشوائي من الكارنيه.
+    """
+    # كلمات البحث الأساسية في كارنيهات الجامعات المصرية
+    keywords = ['رقم الطالب', 'كود الطالب', 'student code', 'id number', 'رقم الكارنيه']
+    
     lines = [line.strip() for line in text.lower().splitlines() if line.strip()]
     
     for i, line in enumerate(lines):
-        if any(key in line for key in keywords):
-            # 1. البحث في نفس السطر
-            numbers_same = re.findall(r'\d+', line)
-            if numbers_same:
-                for num in numbers_same:
-                    if len(num) >= 3: return num
-            
-            # 2. البحث في السطر التالي (مهم جداً للبطاقات التي يكون الرقم فيها بالأسفل)
-            if i + 1 < len(lines):
-                numbers_next = re.findall(r'\d+', lines[i+1])
-                if numbers_next:
-                    for num in numbers_next:
-                        if len(num) >= 3: return num
-    
-    # بحث احتياطي عن أي رقم طويل إذا فشلت الكلمات المفتاحية
-    fallback = re.findall(r'\d{5,}', text)
+        for key in keywords:
+            if key in line:
+                # 1. جرب البحث في نفس السطر (بجانب الكلمة)
+                numbers = re.findall(r'\d+', line)
+                if numbers:
+                    for num in numbers:
+                        if len(num) >= 4: return num # الأرقام الجامعية غالباً > 4 خانات
+                
+                # 2. جرب البحث في السطر التالي مباشرة (أسفل الكلمة)
+                if i + 1 < len(lines):
+                    next_line = lines[i+1]
+                    numbers_next = re.findall(r'\d+', next_line)
+                    if numbers_next:
+                        for num in numbers_next:
+                            if len(num) >= 4: return num
+                            
+    # إذا فشل البحث السياقي، ابحث عن أطول رقم في الصفحة (غالباً هو الـ ID)
+    fallback = re.findall(r'\d{7,15}', text) # ابحث عن رقم طوله بين 7 لـ 15 خانة
     return fallback[0] if fallback else None
 
 def save_attendance(student_id):
