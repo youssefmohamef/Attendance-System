@@ -39,7 +39,7 @@ def extract_id_with_context(text):
     lines = [line.strip() for line in text.lower().splitlines() if line.strip()]
     
     # كلمات دالة على "كود الطالب" فقط
-    target_keywords = ['كود الطالب', 'student code', 'كود', 'code']
+    target_keywords = ['كود الطالب', 'student code', 'كود', 'code',"ID Number"]
     
     for i, line in enumerate(lines):
         if any(key in line for key in target_keywords):
