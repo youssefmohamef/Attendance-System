@@ -39,7 +39,7 @@ def extract_id_with_context(text):
     2. Check the same line for numbers.
     3. If not found, check the immediate next line.
     """
-    keywords = ['id', 'number', 'code', 'student', 'كود', 'الرقم', 'طالب', 'جامعي']
+    keywords = ['id', 'number', 'code', 'student', 'كود', 'الرقم', 'الطالب', 'جامعي']
     lines = [line.strip() for line in text.lower().splitlines() if line.strip()]
     
     for i, line in enumerate(lines):
