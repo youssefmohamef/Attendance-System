@@ -42,6 +42,7 @@ def extract_id_with_context(text):
     keywords = ['id', 'number', 'code', 'student', 'كود', 'الرقم', 'الطالب', 'جامعي']
     lines = [line.strip() for line in text.lower().splitlines() if line.strip()]
     
+    
     for i, line in enumerate(lines):
         # If a keyword is found in the current line
         if any(key in line for key in keywords):
