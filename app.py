@@ -22,7 +22,7 @@ else:
 
 # --- الدوال البرمجية ---
 
-def process_image(img):
+def process_image(img_arr):
     # 1. تحويل الصورة لرمادي
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
     # 2. زيادة التباين (Denoising & Thresholding) لتحسين القراءة
