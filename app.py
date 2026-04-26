@@ -22,12 +22,14 @@ else:
 
 # --- الدوال البرمجية ---
 
-def process_image(img_arr):
-    # 1. تحويل الصورة لرمادي
-    gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-    # 2. زيادة التباين (Denoising & Thresholding) لتحسين القراءة
-    processed_img = cv2.threshold(gray, 0, 255, cv2.THRESH_BINARY | cv2.THRESH_OTSU)[1]
+def pre_process_image(img_array):
+    """Enhance image for better OCR results."""
+    # Convert to grayscale
+    gray = cv2.cvtColor(img_array, cv2.COLOR_BGR2GRAY)
+    # Apply thresholding (Otsu's Binarization) to make text pop
+    _, processed_img = cv2.threshold(gray, 0, 255, cv2.THRESH_BINARY | cv2.THRESH_OTSU)
     return processed_img
+
 
 def extract_id_with_context(text):
     """منطق البحث عن الرقم (بجانب الكلمة أو في السطر الذي يليها)"""
