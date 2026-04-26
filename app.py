@@ -10,10 +10,9 @@ import os
 import re
 
 # --- UI Configuration ---
-st.set_page_config(page_title="Smart AI Attendance", layout="wide")
-st.title('Smart Context-Aware Attendance')
-# st.markdown("Recognizes IDs based on keywords like **'ID Number'**, **'Student Code'**, or **'كود الطالب'**.")
-st.divider()
+st.set_page_config(page_title="AI Attendance System", layout="wide")
+st.title('🆔 Smart Attendance System')
+st.markdown("Scan student IDs via **Live Camera** or **Upload a Photo** to log attendance.")
 
 # --- OCR Engine Path Configuration ---
 if os.name == "nt":
@@ -24,49 +23,45 @@ else:
 # --- Helper Functions ---
 
 def pre_process_image(img_array):
-    """Enhance image for better OCR accuracy."""
+    """Enhance image for better OCR accuracy and glare reduction."""
     gray = cv2.cvtColor(img_array, cv2.COLOR_BGR2GRAY)
-    # Median blur to remove noise while keeping edges sharp
+    # Applying median blur to handle camera noise
     blurred = cv2.medianBlur(gray, 3)
-    # Apply Otsu's thresholding
-    _, processed_img = cv2.threshold(blurred, 0, 255, cv2.THRESH_BINARY | cv2.THRESH_OTSU)
+    # Adaptive thresholding handles uneven lighting better than static thresholding
+    processed_img = cv2.adaptiveThreshold(blurred, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, 
+                                          cv2.THRESH_BINARY, 11, 2)
     return processed_img
 
 def extract_id_with_context(text):
     """
     Search logic:
-    1. Look for keywords (ID, Code, etc.)
-    2. Check the same line for numbers.
-    3. If not found, check the immediate next line.
+    1. Looks for keywords (ID, Code, etc.)
+    2. Checks the same line or the immediate next line for numbers.
     """
     keywords = ['id', 'number', 'code', 'student', 'كود', 'الرقم', 'الطالب', 'جامعي']
     lines = [line.strip() for line in text.lower().splitlines() if line.strip()]
     
-    
     for i, line in enumerate(lines):
-        # If a keyword is found in the current line
         if any(key in line for key in keywords):
-            # A. Search for numbers in the SAME line (بجانب الكلمة)
-            numbers_same_line = re.findall(r'\d+', line)
-            if numbers_same_line:
-                # Return the first number that looks like an ID (at least 3 digits)
-                for num in numbers_same_line:
+            # Same line check
+            numbers_same = re.findall(r'\d+', line)
+            if numbers_same:
+                for num in numbers_same:
                     if len(num) >= 3: return num
             
-            # B. Search in the NEXT line (أسفل الكلمة) - fixed for your ID card style
+            # Next line check (Crucial for cards where ID is below the label)
             if i + 1 < len(lines):
-                next_line = lines[i+1]
-                numbers_next_line = re.findall(r'\d+', next_line)
-                if numbers_next_line:
-                    for num in numbers_next_line:
+                numbers_next = re.findall(r'\d+', lines[i+1])
+                if numbers_next:
+                    for num in numbers_next:
                         if len(num) >= 3: return num
     
-    # Fallback: Just find the longest numeric string in the whole text
+    # Fallback: Find longest numeric string
     all_numbers = re.findall(r'\d{5,}', text)
     return all_numbers[0] if all_numbers else None
 
 def save_attendance(student_id):
-    """Log to CSV and prevent duplicates in the same minute."""
+    """Log to CSV and prevent duplicates within the same minute."""
     filename = 'attendance_records.csv'
     now = datetime.datetime.now()
     timestamp = now.strftime("%Y-%m-%d %H:%M:%S")
@@ -76,7 +71,6 @@ def save_attendance(student_id):
     
     if os.path.isfile(filename):
         df_existing = pd.read_csv(filename)
-        # Check if ID already exists in the current minute
         is_duplicate = not df_existing[(df_existing['Student_ID'].astype(str) == str(student_id)) & 
                                      (df_existing['Timestamp'].str.contains(current_minute))].empty
         
@@ -89,40 +83,55 @@ def save_attendance(student_id):
         new_entry.to_csv(filename, index=False)
         return timestamp, True
 
+# --- Sidebar: Notes & License ---
+with st.sidebar:
+    st.header("📝 Project Info")
+    st.info("""
+    **Notes:**
+    - Avoid direct light glare on the ID.
+    - Ensure the ID number is clear and horizontal.
+    - Path: `attendance_records.csv`
+    """)
+    st.divider()
+    st.markdown("### ⚖️ License")
+    st.caption("Licensed under the **MIT License**. You are free to use and modify this code.")
+
 # --- Main Application Logic ---
 
-# Step 1: Camera Input
-st.subheader("📸 Step 1: Scan ID Card")
-picture = st.camera_input("Position the card clearly in the frame")
+# Step 1: Input Source Selection
+st.subheader("📸 Step 1: Provide ID Image")
+source = st.radio("Choose source:", ("Live Camera", "Upload Image File"), horizontal=True)
 
-if picture:
-    pil_img = Image.open(picture)
+input_image = None
+if source == "Live Camera":
+    input_image = st.camera_input("Scan ID Card")
+else:
+    input_image = st.file_uploader("Choose an image file...", type=['jpg', 'jpeg', 'png'])
+
+if input_image:
+    pil_img = Image.open(input_image)
     img_array = np.array(pil_img)
     img_bgr = cv2.cvtColor(img_array, cv2.COLOR_RGB2BGR)
 
     with st.spinner('🔍 Analyzing context and searching for ID...'):
         processed_img = pre_process_image(img_bgr)
-        # Try to read both English and Arabic if data files are present
         try:
             extracted_text = pytesseract.image_to_string(processed_img, lang='eng+ara', config='--psm 6')
         except:
             extracted_text = pytesseract.image_to_string(processed_img, lang='eng', config='--psm 6')
         
-        # Step 2: Use Context Logic to find the right number
         student_id = extract_id_with_context(extracted_text)
 
     st.divider()
     col1, col2 = st.columns(2)
 
     with col1:
-        st.image(img_bgr, channels="BGR", caption="Original Captured Image")
+        st.image(img_bgr, channels="BGR", caption="Input ID Card")
 
     with col2:
         st.subheader("🎯 System Detection")
         if student_id:
             st.success(f"**Identified ID:** {student_id}")
-            
-            # Step 3: Save Record
             log_time, success = save_attendance(student_id)
             
             if success:
@@ -131,24 +140,24 @@ if picture:
             else:
                 st.warning("⚠️ Already logged in the last minute.")
             
-            if st.button("➕ Add Another Person"):
+            if st.button("➕ Clear & Add Next"):
                 st.rerun()
         else:
-            st.error("❌ Could not find an ID (e.g., Code, ID, Number).")
-            with st.expander("Show Raw OCR Result"):
+            st.error("❌ No ID found. Ensure keywords (ID, Code) or numbers are visible.")
+            with st.expander("Debug: Raw Text Output"):
                 st.text(extracted_text)
 
-# --- Step 4: History & Export ---
+# --- Step 4: Attendance Log ---
 if os.path.isfile('attendance_records.csv'):
     st.divider()
-    st.subheader("📋 Today's Attendance Log")
+    st.subheader("📋 Recent Attendance Records")
     df_log = pd.read_csv('attendance_records.csv')
-    
     st.dataframe(df_log.iloc[::-1], use_container_width=True)
     
+    # Export options
     csv_data = df_log.to_csv(index=False).encode('utf-8')
     st.download_button(
-        label="📥 Download Attendance Report",
+        label="📥 Export Attendance Report (CSV)",
         data=csv_data,
         file_name='attendance_report.csv',
         mime='text/csv',
