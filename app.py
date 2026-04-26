@@ -142,6 +142,34 @@ if final_image_file:
             st.error("❌ No ID found. Please try a clearer photo or avoid light glare.")
             with st.expander("Show what the AI saw (Debug)"):
                 st.text(extracted_text)
+        # --- إضافة خيارات التحكم في السجل في الـ Sidebar ---
+with st.sidebar:
+    st.header("🧹 Manage Records")
+    
+    # 1. زر مسح آخر عملية (Undo)
+    if st.button("⏪ Delete Last Entry"):
+        if os.path.isfile('attendance_records.csv'):
+            df = pd.read_csv('attendance_records.csv')
+            if not df.empty:
+                df = df[:-1] # حذف آخر صف
+                df.to_csv('attendance_records.csv', index=False)
+                st.success("Last record deleted!")
+                st.rerun()
+            else:
+                st.warning("Log is already empty.")
+        else:
+            st.error("No record file found.")
+
+    st.divider()
+
+    # 2. زر مسح السجل بالكامل (Format)
+    if st.button("🗑️ Clear All Records", type="primary"):
+        if os.path.isfile('attendance_records.csv'):
+            os.remove('attendance_records.csv') # حذف الملف نهائياً
+            st.success("All records cleared!")
+            st.rerun()
+        else:
+            st.info("Log is already clean.")
 
 # --- عرض سجل الحضور وتصديره ---
 if os.path.isfile('attendance_records.csv'):
