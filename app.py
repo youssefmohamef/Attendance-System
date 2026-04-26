@@ -16,8 +16,8 @@ st.markdown("Scan your ID card using the **Camera** or **Upload a Photo**.")
 
 # --- Session State Initialization ---
 # This key is used to reset the camera/uploader when switching to a new student
-if 'uploader_key' not in st.session_state:
-    st.session_state.uploader_key = 0
+# if 'uploader_key' not in st.session_state:
+#     st.session_state.uploader_key = 0
 
 # --- Tesseract OCR Path ---
 if os.name == "nt":
