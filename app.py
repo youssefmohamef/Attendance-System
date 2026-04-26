@@ -32,29 +32,38 @@ def pre_process_image(img_array):
 
 
 def extract_id_with_context(text):
-    """منطق البحث عن الرقم (بجانب الكلمة أو في السطر الذي يليها)"""
-    keywords = ["كود"]
+    """
+    منطق مخصص لقراءة 'كود الطالب' فقط وتجاهل أي أرقام أخرى
+    """
+    # تحويل النص لأسطر وتنظيفها
     lines = [line.strip() for line in text.lower().splitlines() if line.strip()]
     
-    for i, line in enumerate(lines):
-        if any(key in line for key in keywords):
-            # 1. البحث في نفس السطر
-            numbers_same = re.findall(r'\d+', line)
-            if numbers_same:
-                for num in numbers_same:
-                    if len(num) >= 3: return num
-            
-            # 2. البحث في السطر التالي (مهم جداً للبطاقات التي يكون الرقم فيها بالأسفل)
-            if i + 1 < len(lines):
-                numbers_next = re.findall(r'\d+', lines[i+1])
-                if numbers_next:
-                    for num in numbers_next:
-                        if len(num) >= 3: return num
+    # كلمات دالة على "كود الطالب" فقط
+    target_keywords = ['كود الطالب', 'student code', 'كود', 'code']
     
-    # بحث احتياطي عن أي رقم طويل إذا فشلت الكلمات المفتاحية
-    fallback = re.findall(r'\d{5,}', text)
-    return fallback[0] if fallback else None
-
+    for i, line in enumerate(lines):
+        if any(key in line for key in target_keywords):
+            # 1. ابحث عن رقم في نفس السطر (بجانب كلمة كود الطالب)
+            # سنبحث عن أرقام فقط ونستبعد أي حروف مثل CMP
+            numbers_same_line = re.findall(r'\b\d{5,}\b', line) 
+            if numbers_same_line:
+                return numbers_same_line[0]
+            
+            # 2. إذا لم يجد في نفس السطر، ابحث في السطر التالي (أسفل كلمة كود الطالب)
+            if i + 1 < len(lines):
+                next_line = lines[i+1]
+                # نبحث عن رقم يتكون من 5 خانات أو أكثر (لضمان أنه الكود)
+                numbers_next_line = re.findall(r'\b\d{5,}\b', next_line)
+                if numbers_next_line:
+                    return numbers_next_line[0]
+    
+    # خيار احتياطي: إذا فشل البحث بالكلمات، ابحث عن آخر رقم طويل في الصفحة
+    # لأن 'كود الطالب' غالباً يكون في أسفل الكارنيه مقارنة بالرقم الأكاديمي
+    all_long_numbers = re.findall(r'\b\d{7,}\b', text)
+    if all_long_numbers:
+        return all_long_numbers[-1] # نأخذ الأخير لأنه غالباً هو الكود في ترتيب الكارنيه
+        
+    return None
 def save_attendance(student_id):
     """حفظ السجل في ملف CSV ومنع التكرار في نفس الدقيقة"""
     filename = 'attendance_records.csv'
