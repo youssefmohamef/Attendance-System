@@ -175,37 +175,40 @@ with st.sidebar:
 # --- Step 4: Attendance Log with Delete Option ---
 if os.path.isfile('attendance_records.csv'):
     st.divider()
-    st.subheader("📋 سجل الحضور (حدد للحذف)")
+    st.subheader("📋 Attendance Records (Select to Delete)")
     
+    # 1. قراءة البيانات
     df_log = pd.read_csv('attendance_records.csv')
     
-    # إضافة عمود اختيار (Checkbox) للمسح
-    # نقوم بإضافة عمود مؤقت اسمه "حذف"
-    df_with_del = df_log.copy()
-    df_with_del.insert(0, "선택", False) # عمود للاختيار
-
-    # استخدام data_editor للسماح للمستخدم بالاختيار
+    # 2. إضافة عمود "Delete" كـ Checkbox باستخدام st.data_editor
+    # هذا يسمح للمستخدم بتحديد الصفوف التي يريد مسحها
     edited_df = st.data_editor(
-        df_log.iloc[::-1], # عرض الأحدث أولاً
+        df_log.iloc[::-1], # عرض السجل من الأحدث للأقدم
         column_config={
             "Delete": st.column_config.CheckboxColumn(
-                "امسح الطالب",
-                help="اختر الطالب اللي عايز تمسحه من السجل",
+                "Select to Delete",
+                help="Check the box to mark for deletion",
                 default=False,
             )
         },
-        disabled=["Student_ID", "Timestamp"], # منع تعديل الأرقام
+        disabled=["Student_ID", "Timestamp"], # منع تعديل البيانات نفسها
         use_container_width=True,
-        key="editor"
+        key="attendance_editor"
     )
 
-    # زر تنفيذ الحذف
-    if st.button("❌ حذف الصفوف المختارة"):
-        # إذا كان هناك عمود اسمه "Delete" (أو حسب ما يظهر في الـ editor)
-        # نقوم بفلترة البيانات وحفظ المتبقي فقط
+    # 3. زر لتنفيذ عملية الحذف للصفوف المختارة
+    if st.button("🗑️ Delete Selected Rows"):
+        # نحدد الصفوف التي لم يتم تعليمها للحذف
+        # ملاحظة: edited_df قد يحتوي على عمود Delete الجديد
         if "Delete" in edited_df.columns:
             remaining_df = edited_df[edited_df["Delete"] == False].drop(columns=["Delete"])
-            # إعادة حفظ الملف بالبيانات المتبقية
+            # عكس الترتيب مرة أخرى قبل الحفظ ليبقى الترتيب الزمني صحيحاً
             remaining_df.iloc[::-1].to_csv('attendance_records.csv', index=False)
-            st.success("تم الحذف بنجاح!")
+            st.success("Selected records deleted!")
             st.rerun()
+        else:
+            st.info("Please select rows to delete first.")
+
+    # 4. زر التحميل
+    csv_data = df_log.to_csv(index=False).encode('utf-8')
+    st.download_button("📥 Download Report (CSV)", csv_data, "attendance.csv", "text/csv")
