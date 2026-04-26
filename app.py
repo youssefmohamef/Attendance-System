@@ -12,12 +12,12 @@ import re
 # --- UI Configuration ---
 st.set_page_config(page_title="AI Attendance System", layout="wide")
 st.title('🆔 Smart Attendance System')
-st.markdown("Scan your ID card using the **Camera** or **Upload a Photo**.")
+st.markdown("Scan your ID card using the **Camera**")
 
 # --- Session State Initialization ---
 # This key is used to reset the camera/uploader when switching to a new student
-# if 'uploader_key' not in st.session_state:
-#     st.session_state.uploader_key = 0
+if 'uploader_key' not in st.session_state:
+    st.session_state.uploader_key = 0
 
 # --- Tesseract OCR Path ---
 if os.name == "nt":
@@ -80,7 +80,7 @@ def save_attendance(student_id):
 # --- Main App Logic ---
 
 st.subheader("📸 Step 1: Input Source")
-input_mode = st.radio("Choose source:", ("📷 Live Camera Scan", "📁 Upload Image"), horizontal=True)
+input_mode = st.radio("Choose source:", ("📷 Live Camera Scan"), horizontal=True)
 
 # Generate a dynamic key to reset inputs
 final_image_file = None
@@ -88,8 +88,6 @@ current_key = f"{input_mode}_{st.session_state.uploader_key}"
 
 if input_mode == "📷 Live Camera Scan":
     final_image_file = st.camera_input("Capture ID", key=current_key)
-else:
-    final_image_file = st.file_uploader("Upload Image", type=['jpg', 'jpeg', 'png'], key=current_key)
 
 if final_image_file:
     pil_img = Image.open(final_image_file)
