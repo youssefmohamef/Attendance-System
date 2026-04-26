@@ -23,13 +23,19 @@ else:
 # --- الدوال البرمجية ---
 
 def pre_process_image(img_array):
-    """تحسين الصورة لزيادة دقة القراءة"""
+    # 1. تحويل للرمادي
     gray = cv2.cvtColor(img_array, cv2.COLOR_BGR2GRAY)
-    # تقليل النويز الناتج عن الكاميرا أو جودة الصورة المرفوعة
-    blurred = cv2.medianBlur(gray, 3)
-    # عزل النصوص عن الخلفية بتقنية التكيف (أفضل للإضاءة الضعيفة)
-    processed_img = cv2.adaptiveThreshold(blurred, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, 
-                                          cv2.THRESH_BINARY, 11, 2)
+    
+    # 2. زيادة التباين (Contrast) لإظهار الأرقام الباهتة
+    clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8,8))
+    gray = clahe.apply(gray)
+    
+    # 3. إزالة النويز مع الحفاظ على حواف الأرقام حادة
+    denoised = cv2.fastNlMeansDenoising(gray, h=10)
+    
+    # 4. تحويل لأسود وأبيض نقي (Thresholding)
+    _, processed_img = cv2.threshold(denoised, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
+    
     return processed_img
 
 def extract_id_with_context(text):
